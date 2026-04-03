@@ -2,10 +2,16 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import * as Repack from '@callstack/repack';
 import rspack from '@rspack/core';
-import {getSharedDependencies} from 'super-app-showcase-sdk';
+import sdk from 'super-app-showcase-sdk';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const {
+  getFederationDevConfig,
+  getFederationDtsConfig,
+  getSharedDependencies,
+  getWatchOptions,
+} = sdk;
 
 /**
  * Rspack configuration enhanced with Re.Pack defaults for React Native.
@@ -25,6 +31,7 @@ export default Repack.defineRspackConfig(({mode, platform}) => {
     output: {
       uniqueName: 'sas-host',
     },
+    watchOptions: getWatchOptions(),
     module: {
       rules: [
         {
@@ -43,7 +50,8 @@ export default Repack.defineRspackConfig(({mode, platform}) => {
       new Repack.RepackPlugin(),
       new Repack.plugins.ModuleFederationPluginV2({
         name: 'host',
-        dts: false,
+        dev: getFederationDevConfig(),
+        dts: getFederationDtsConfig(__dirname, {generateTypes: false}),
         remotes: {
           booking: `booking@http://localhost:9000/${platform}/mf-manifest.json`,
           shopping: `shopping@http://localhost:9001/${platform}/mf-manifest.json`,

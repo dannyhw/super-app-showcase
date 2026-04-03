@@ -2,10 +2,16 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import * as Repack from '@callstack/repack';
 import rspack from '@rspack/core';
-import {getSharedDependencies} from 'super-app-showcase-sdk';
+import sdk from 'super-app-showcase-sdk';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const {
+  getFederationDevConfig,
+  getFederationDtsConfig,
+  getSharedDependencies,
+  getWatchOptions,
+} = sdk;
 
 const STANDALONE = Boolean(process.env.STANDALONE);
 
@@ -27,6 +33,7 @@ export default Repack.defineRspackConfig(({mode, platform}) => {
     output: {
       uniqueName: 'sas-dashboard',
     },
+    watchOptions: getWatchOptions(),
     module: {
       rules: [
         {
@@ -46,7 +53,8 @@ export default Repack.defineRspackConfig(({mode, platform}) => {
       new Repack.plugins.ModuleFederationPluginV2({
         name: 'dashboard',
         filename: 'dashboard.container.js.bundle',
-        dts: false,
+        dev: getFederationDevConfig(),
+        dts: getFederationDtsConfig(__dirname),
         exposes: STANDALONE
           ? undefined
           : {'./App': './src/navigation/MainNavigator'},

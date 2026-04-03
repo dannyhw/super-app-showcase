@@ -2,10 +2,16 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import * as Repack from '@callstack/repack';
 import rspack from '@rspack/core';
-import {getSharedDependencies} from 'super-app-showcase-sdk';
+import sdk from 'super-app-showcase-sdk';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const {
+  getFederationDevConfig,
+  getFederationDtsConfig,
+  getSharedDependencies,
+  getWatchOptions,
+} = sdk;
 
 /**
  * Rspack configuration enhanced with Re.Pack defaults for React Native.
@@ -23,6 +29,7 @@ export default Repack.defineRspackConfig(({mode}) => {
     output: {
       uniqueName: 'sas-auth',
     },
+    watchOptions: getWatchOptions(),
     module: {
       rules: [
         {
@@ -42,7 +49,8 @@ export default Repack.defineRspackConfig(({mode}) => {
       new Repack.plugins.ModuleFederationPluginV2({
         name: 'auth',
         filename: 'auth.container.js.bundle',
-        dts: false,
+        dev: getFederationDevConfig(),
+        dts: getFederationDtsConfig(__dirname, {consumeTypes: false}),
         exposes: {
           './AccountScreen': './src/screens/AccountScreen',
           './SignInScreen': './src/screens/SignInScreen',
